@@ -1,0 +1,217 @@
+---
+title: "SOProject2013"
+author: "Loswijk"
+date: "2024-05-20"
+output: html_document
+---
+
+```{r}
+load("C:/Users/Cjlos/OneDrive/Documents/fall2023/armypay/2024spring/Psyv0500/BRFSS2013_b.RData")
+```
+
+```{r}
+require(plyr)
+require(dplyr)
+require(tidyverse)
+require(ggplot2)
+require(stargazer)
+require(rpart)
+require(rpart.plot)
+```
+
+```{r}
+library(broom)
+```
+
+```{r}
+require(class)
+require(caret)
+```
+
+```{r}
+summary(dat3)
+```
+
+```{r}
+NN <- length(dat3$X_AGE80)
+set.seed(12345)
+restrict_1 <- (runif(NN) < 0.1) 
+summary(restrict_1)
+
+```
+
+```{r}
+NN <- length(dat3$X_AGE80)
+set.seed(12345)
+restrict_1 <- (runif(NN) < 0.1) 
+summary(restrict_1)
+
+```
+
+```{r}
+NN <- length(dat3$X_AGE80)
+set.seed(12345)
+restrict_1 <- (runif(NN) < 0.1) 
+summary(restrict_1)
+
+```
+
+```{r}
+dat3s <- subset(dat3, restrict_1)
+```
+
+```{r}
+dat3_clean <- na.omit(dat3s)
+
+```
+
+```{r}
+summary(dat3_clean)
+```
+
+```{r}
+xtabs(~dat3_clean$MENTHLTH + dat3_clean$X_SMOKER3)
+```
+
+```{r}
+xtabs(~dat3_clean$X_SMOKER3 + dat3_clean$SEX + dat3_clean$MENTHLTH)
+```
+
+```{r}
+p <- ggplot(data = dat3_clean, 
+            mapping = aes(x = MENTHLTH, y = X_SMOKER3)) 
+p + geom_point()
+
+```
+
+```{r}
+p <- ggplot(data = dat3_clean,
+            mapping = aes(x = MENTHLTH, y = X_SMOKER3))
+p + geom_boxplot()
+```
+
+```{r}
+p <- ggplot(data = dat3_clean,
+            mapping = aes(x = MENTHLTH, y = X_SMOKER3))
+p + geom_jitter()
+```
+
+```{r}
+dat3_clean <- dat3_clean %>%
+  mutate(
+    X_AGE80 = as.factor(X_AGE80))
+
+```
+
+```{r}
+dat3_clean$Age_midpt <- fct_recode(dat3_clean$X_AGE80, "21" = "Age 18 to 24",
+                                "27" = "Age 25 to 29", "32" = "Age 30 to 34",
+                                "37" = "Age 35 to 39", "42" = "Age 40 to 44",
+                                "47" = "Age 45 to 49", "52" = "Age 50 to 54",
+                                "57" = "Age 55 to 59", "62" = "Age 60 to 64",
+                                "67" = "Age 65 to 69", "72" = "Age 70 to 74",
+                                "77" = "Age 75 to 79", "82" = "Age 80 or older",
+                                NULL = "Dont know/Refused/Missing")
+
+```
+
+```{r}
+levels(as.factor(dat3$X_AGE80))
+
+```
+
+```{r}
+dat3_clean$Age_midpt <- fct_recode(dat3_clean$X_AGE80,
+                                   "1" = "Age 18 to 33", "17" = "Age 34 to 49", 
+                                   "33" = "Age 50 to 65", "49" = "Age 66 to 80")
+```
+```{r}
+p <- ggplot(data = dat3_clean,
+            mapping = aes(x = X_AGE80, y = X_SMOKER3))
+p + geom_jitter() + geom_smooth()
+```
+
+```{r}
+ggplot(dat3_clean, aes(x = MENTHLTH, y = X_SMOKER3)) +
+  geom_boxplot()
+
+```
+
+```{r}
+p <- ggplot(data = dat3_clean,
+            mapping = aes(x = MENTHLTH, fill = X_SMOKER3))
+p + geom_bar(position = "fill")
+```
+
+```{r}
+p <- ggplot(data = dat3_clean,
+            mapping = aes(x = X_AGE80, fill = X_SMOKER3))
+p + geom_bar(position = "fill")
+```
+
+```{r}
+dat3_clean$X_AGE80 <- as.numeric(levels(dat3_clean$X_AGE80))[dat3_clean$X_AGE80]
+summary(dat3_clean$X_AGE80) 
+```
+
+```{r}
+
+```
+
+```{r}
+dat3_clean$Age_midpt <- fct_recode(dat3_clean$X_AGE80, "21" = "Age 18 to 24",
+                                "27" = "Age 25 to 29", "32" = "Age 30 to 34",
+                                "37" = "Age 35 to 39", "42" = "Age 40 to 44",
+                                "47" = "Age 45 to 49", "52" = "Age 50 to 54",
+                                "57" = "Age 55 to 59", "62" = "Age 60 to 64",
+                                "67" = "Age 65 to 69", "72" = "Age 70 to 74",
+                                "77" = "Age 75 to 79", "82" = "Age 80 or older")
+```
+
+```{r}
+model_1 <- lm(MENTHLTH ~ X_AGE80, data = dat3_clean)
+summary(model_1)
+
+```
+
+```{r}
+model_2 <- lm(X_AGE80 ~ X_SMOKER3, data = dat3_clean)
+summary(model_2)
+```
+
+```{r}
+model_3 <- lm(X_AGE80 ~ X_SMOKER3 + MENTHLTH, data = dat3_clean)
+summary(model_3)
+```
+
+```{r}
+```
+
+```{r}
+dat3_clean$SEX <- as.numeric(levels(dat3_clean$SEX))[dat3_clean$SEX]
+
+```
+
+```{r}
+model_4 <- lm(X_SMOKER3 ~ X_AGE80 + MENTHLTH + SEX, data = dat3_clean)
+summary(model_4)
+```
+
+```{r}
+anova(model_1,model_2,model_3,model_4)
+
+```
+
+```{r}
+dat3 <- dat3 %>%
+  mutate(X_AGE80 = as.factor(X_AGE80))
+
+dat3_clean <- dat3 %>%
+  drop_na(MENTHLTH, X_SMOKER3)
+
+str(dat3_clean)
+
+```
+
+```{r}
+anova_result <- aov(MENTHLTH ~ X_AGE80 + X_SMOKER3 + SEX, data = dat3_clean)
